@@ -1,5 +1,5 @@
 {
-    "name": "xiaolong/laravel-scout-elastic",
+    "name": "yellenli/laravel-scout-elastic",
     "description": "Elastic Driver for Laravel Scout (imitation)",
     "keywords": ["laravel", "scout", "elasticsearch", "elastic"],
     "require": {
