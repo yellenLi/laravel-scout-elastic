@@ -5,3 +5,6 @@ You can install the package via composer:
 ``` bash
 composer require yellenli/laravel-scout-elastic
 ```
+## License
+
+The MIT License (MIT).
