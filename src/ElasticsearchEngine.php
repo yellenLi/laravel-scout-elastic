@@ -99,7 +99,8 @@ class ElasticsearchEngine extends Engine
     {
         return $this->performSearch($builder, array_filter([
             'numericFilters' => $this->filters($builder),
-            'size' => $builder->limit,
+//            'size' => $builder->limit,
+            'size' => 100,
         ]));
     }
 
