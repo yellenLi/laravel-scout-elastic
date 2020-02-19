@@ -3,9 +3,9 @@
     "description": "Elastic Driver for Laravel Scout (imitation)",
     "keywords": ["laravel", "scout", "elasticsearch", "elastic"],
     "require": {
-        "php": ">=5.6.4",
-        "laravel/scout": "^5.0|^6.0|^7.0",
-        "elasticsearch/elasticsearch": "^5.0"
+        "php": ">=7.1.16",
+        "laravel/scout": "^7.0",
+        "elasticsearch/elasticsearch": "v7.6.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
@@ -23,7 +23,7 @@
         }
     },
     "suggest": {
-        "elasticsearch/elasticsearch": "Required to use the Elasticsearch engine (^5.0)."
+        "elasticsearch/elasticsearch": "Required to use the Elasticsearch engine (^7.4)."
     },
     "extra": {
         "laravel": {
