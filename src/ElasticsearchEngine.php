@@ -53,8 +53,7 @@ class ElasticsearchEngine extends Engine
             $params['body'][] = [
                 'update' => [
                     '_id' => $model->getKey(),
-                    '_index' => $this->getEsIndex($model),
-                    '_type' => $model->searchableAs(),
+                    '_index' => $model->searchableAs(),
                 ]
             ];
             $params['body'][] = [
@@ -80,8 +79,7 @@ class ElasticsearchEngine extends Engine
             $params['body'][] = [
                 'delete' => [
                     '_id' => $model->getKey(),
-                    '_index' => $this->getEsIndex($model),
-                    '_type' => $model->searchableAs(),
+                    '_index' => $model->searchableAs(),
                 ]
             ];
         });
@@ -99,8 +97,7 @@ class ElasticsearchEngine extends Engine
     {
         return $this->performSearch($builder, array_filter([
             'numericFilters' => $this->filters($builder),
-//            'size' => $builder->limit,
-            'size' => 100,
+            'size' => $builder->model->searchLimit,
         ]));
     }
 
@@ -108,8 +105,8 @@ class ElasticsearchEngine extends Engine
      * Perform the given search on the engine.
      *
      * @param Builder $builder
-     * @param int $perPage
-     * @param int $page
+     * @param int     $perPage
+     * @param int     $page
      * @return mixed
      */
     public function paginate(Builder $builder, $perPage, $page)
@@ -129,19 +126,35 @@ class ElasticsearchEngine extends Engine
      * Perform the given search on the engine.
      *
      * @param Builder $builder
-     * @param array $options
+     * @param array   $options
      * @return mixed
      */
     protected function performSearch(Builder $builder, array $options = [])
     {
-        $builderQuery = ($builder->model->wordSegmentation) ? "{$builder->query}" : "*{$builder->query}*";
+        //检索兼容处理 start
+        // 检索条件
+        // 自动截取长度: 30  mb_substr
+        // 查询定义 分词 的字段
+        $query = mb_substr($builder->query, 0, 30);
+        $pattern = '/(:|!|\(|\)|\{|\}|\[|\]|\^|\")/';
+        $replace = '\\\$1';
+        $query = preg_replace($pattern, $replace, $query);
+
+        $query_string = ['query' => $query];
+        if ($builder->model->analyzeField) {
+            $query_string['default_field'] = $builder->model->analyzeField;
+        }
+        //检索兼容处理 end
         $params = [
-            'index' => $this->getEsIndex($builder->model),
-            'type' => $builder->index ?: $builder->model->searchableAs(),
+            'index' => $builder->model->searchableAs(),
             'body' => [
                 'query' => [
                     'bool' => [
-                        'must' => [['query_string' => ['query' => $builderQuery]]]
+                        'must' => [
+                            [
+                                'query_string' => $query_string
+                            ]
+                        ]
                     ]
                 ]
             ]
@@ -187,8 +200,8 @@ class ElasticsearchEngine extends Engine
             if (is_array($value)) {
                 return ['terms' => [$key => $value]];
             }
-
-            return ['match_phrase' => [$key => $value]];
+//            return ['match_phrase' => [$key => $value]];
+            return ['term' => [$key => $value]];
         })->values()->all();
     }
 
@@ -206,8 +219,8 @@ class ElasticsearchEngine extends Engine
     /**
      * Map the given results to instances of the given model.
      *
-     * @param \Laravel\Scout\Builder $builder
-     * @param mixed $results
+     * @param \Laravel\Scout\Builder              $builder
+     * @param mixed                               $results
      * @param \Illuminate\Database\Eloquent\Model $model
      * @return Collection
      */
@@ -267,13 +280,4 @@ class ElasticsearchEngine extends Engine
         })->toArray();
     }
 
-    /**
-     * Custom index.
-     * @param $model
-     * @return string
-     */
-    protected function getEsIndex($model)
-    {
-        return $model->esIndex ?: $this->index;
-    }
 }
