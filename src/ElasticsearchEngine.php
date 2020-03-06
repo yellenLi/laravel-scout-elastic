@@ -136,8 +136,10 @@ class ElasticsearchEngine extends Engine
         // 自动截取长度: 30  mb_substr
         // 查询定义 分词 的字段
         $query = mb_substr($builder->query, 0, 30);
-        $pattern = '/(:|!|\(|\)|\{|\}|\[|\]|\^|\")/';
-        $replace = '\\\$1';
+//        $pattern = '/(:|!|\(|\)|\{|\}|\[|\]|\^|\")/';
+        $pattern = '/(\+|-|&|\||!|\(|\)|\{|}|\[|]|\^|"|~|\*|\?|:|;|~|\/)/';
+//        $replace = '\\\$1';
+        $replace = '';
         $query = preg_replace($pattern, $replace, $query);
 
         $query_string = ['query' => $query];
